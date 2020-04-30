@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Class Contents
+Practice.ipynb
+chromedriver.exe
+
 # C extensions
 *.so
 
