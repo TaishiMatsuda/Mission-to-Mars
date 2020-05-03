@@ -15,8 +15,11 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
+        "last_modified": dt.datetime.now(),
+        "hemisphere_images": hemisphere_img(browser)
     }
+
+    return data
 
 def mars_news(browser):
     # Visit the mars nasa news site
@@ -30,6 +33,7 @@ def mars_news(browser):
     html = browser.html
     news_soup = soup(html, 'html.parser')
 
+    # Add try/except for error handling
     try:
         slide_elem = news_soup.select_one('ul.item_list li.slide')
         # Use the parent element to find the first <a> tag and save it as `news_title`
@@ -66,6 +70,36 @@ def featured_image(browser):
     
     return img_url
 
+
+def hemisphere_img(browser):
+    # Visit Mars Hemisphere Search Results
+    mars_hemi_url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    browser.visit(mars_hemi_url)
+    
+    # Parse the resulting html with soup for Title of images
+    titles = []
+    html = browser.html
+    title_soup = soup(html, 'html.parser').find_all('h3')
+    for x in range(4):
+        titles.append(title_soup[x].text)
+
+    # For URL of image files
+    img_urls = []
+    for x in range(4):
+        # Click link to the search result page 
+        browser.find_by_tag('h3')[x].click()
+        # Parse the resulting html with soup and store in dictionary
+        html = browser.html
+        hemisphere_soup = soup(html, 'html.parser')
+        img_urls.append(hemisphere_soup.select_one('div.downloads ul li a')['href'])
+        # Back to Search Results
+        browser.back()
+
+    mars_hemisphere = []
+    for x in range(4):
+        mars_hemisphere.append({"title": titles[x], "img_url": img_urls[x]})
+
+    return mars_hemisphere
 
 def mars_facts():
     # Add try/except for error handling
